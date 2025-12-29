@@ -110,6 +110,7 @@ pip install scanpy anndata harmonypy
 
 # Optional: scib for advanced benchmarking
 pip install scib
+pip install scib-metrics
 ```
 
 ---

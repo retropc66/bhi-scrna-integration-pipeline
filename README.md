@@ -36,7 +36,7 @@ cd scrna-integration-pipeline
 
 # Install dependencies
 pip install scanpy scvi-tools anndata pandas numpy scipy matplotlib seaborn scikit-learn
-pip install scib  # Optional, for advanced benchmarking
+pip install scib scib-metrics  # Optional, for integration benchmarking
 ```
 
 ### Directory Setup
@@ -44,7 +44,6 @@ pip install scib  # Optional, for advanced benchmarking
 ```bash
 mkdir -p output/{anndata,cellassign,embeddings,models,benchmark}
 mkdir -p data/markers
-mkdir -p logs
 ```
 
 ### Running on DRAC/Nibi Cluster
@@ -52,6 +51,8 @@ mkdir -p logs
 ```bash
 # Make scripts executable
 chmod +x *.sh
+
+Job submission scripts are expected to be submitted from the `slurm/` directory. They will use the relative path to access the appropriate python scripts.
 
 # Submit entire pipeline with automatic dependencies
 ./submit_pipeline.sh
@@ -70,6 +71,11 @@ Your starting data should be an AnnData object (`raw.h5ad`) with:
 - Raw counts in `.X` (sparse matrix preferred)
 - `sample_id` column in `.obs` identifying each sample
 - Gene names in `.var_names`
+
+Interactive/custom preprocessing can be done to bypass 01_preprocess.sh as long as the general structure is preserved:
+- Raw counts are stored in `.layers['counts']`
+- `sample_id` column in `.obs` identifying each sample
+- The anndata object is subset to the appropriate features (eg. HVGs) for subsequent embeddings
 
 ## Output
 
@@ -110,7 +116,6 @@ The final `.h5ad` file includes:
 
 - [USAGE.md](USAGE.md) - Detailed usage guide and examples
 - [DRAC_SETUP.md](DRAC_SETUP.md) - Cluster-specific setup instructions
-- [CONTRIBUTING.md](CONTRIBUTING.md) - Guidelines for lab members
 
 ## Citation
 

@@ -20,7 +20,7 @@ LABEL_KEY = "celltype_pred"
 # Methods to benchmark. Set to None to auto-detect from available embeddings.
 METHODS = None  # or e.g. ["scvi", "harmony"]
 
-N_JOBS = 8
+N_JOBS = 32
 # =========================
 
 import scanpy as sc
@@ -115,21 +115,9 @@ print("=" * 60)
 
 from scib_metrics.benchmark import Benchmarker, BioConservation, BatchCorrection
 
-bio_metrics = BioConservation(
-    nmi_ari_cluster_labels_kmeans=True,
-    nmi_ari_cluster_labels_leiden=False,
-    silhouette_label=True,
-    clisi=True,
-    isolated_labels=False
-)
-
-batch_metrics = BatchCorrection(
-    silhouette_batch=True,
-    ilisi=True,
-    kbet=True,
-    graph_connectivity=True,
-    pcr_comparison=True
-)
+# Use defaults - disable isolated_labels for speed on large datasets
+bio_metrics = BioConservation(isolated_labels=False)
+batch_metrics = BatchCorrection()
 
 bm = Benchmarker(
     adata,
