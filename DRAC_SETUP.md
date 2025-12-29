@@ -106,7 +106,7 @@ These are typically NOT in DRAC wheels, install from PyPI:
 pip install scvi-tools
 
 # scanpy and anndata
-pip install scanpy anndata
+pip install scanpy anndata harmonypy
 
 # Optional: scib for advanced benchmarking
 pip install scib
