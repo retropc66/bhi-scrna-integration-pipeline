@@ -68,7 +68,7 @@ Your starting data should be an AnnData object (`raw.h5ad`) with:
 - `sample_id` column in `.obs` identifying each sample
 - Gene names in `.var_names`
 
-Interactive/custom preprocessing can be done to bypass 01_preprocess.sh as long as the general structure is preserved:
+Interactive/custom preprocessing can be done to bypass 01_preprocess.sh (eg. to add additional steps, such as ambient RNA removal and/or doublet detection) as long as the general structure is preserved:
 - Raw counts are stored in `.layers['counts']`
 - `sample_id` column in `.obs` identifying each sample
 - The anndata object is subset to the appropriate features (eg. HVGs) for subsequent embeddings
