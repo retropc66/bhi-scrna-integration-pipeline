@@ -88,7 +88,7 @@ for ct in signatures.columns:
 print("\n🚀 Training CellAssign...")
 CellAssign.setup_anndata(bdata, size_factor_key="size_factor")
 ca = CellAssign(bdata, signatures)
-ca.train()  # Use defaults (400 epochs, early stopping)
+ca.train(early_stopping_patience=50)  #400 epochs, early stopping. More patience to avoid stopping at bad local minimum)
 
 # Save convergence plot
 print("\n📈 Saving convergence plot...")

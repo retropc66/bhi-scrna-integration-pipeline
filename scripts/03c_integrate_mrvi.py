@@ -4,6 +4,7 @@
 # CONFIG
 # =========================
 PREPROCESSED_H5AD = "/home/dcook/projects/def-dcook/active/rare_ov/output/anndata/preprocessed.h5ad"
+CELLASSIGN_PREDICTIONS = "/home/dcook/projects/def-dcook/active/rare_ov/output/cellassign/predictions.csv"
 OUTPUT_DIR = "/home/dcook/projects/def-dcook/active/rare_ov/output"
 MODEL_DIR = f"{OUTPUT_DIR}/models/mrvi"
 EMBEDDING_NPZ = f"{OUTPUT_DIR}/embeddings/mrvi/embedding.npz"
@@ -14,6 +15,7 @@ N_LATENT = 30
 
 import scanpy as sc
 import numpy as np
+import pandas as pd
 import scvi
 from scvi.external.mrvi_torch import TorchMRVI as MRVI  # Explicitly use PyTorch backend
 import torch
@@ -39,6 +41,15 @@ adata = sc.read_h5ad(PREPROCESSED_H5AD)
 print(f"   Cells: {adata.n_obs:,}")
 print(f"   Genes (HVGs): {adata.n_vars:,}")
 print(f"   Samples: {adata.obs[SAMPLE_KEY].nunique()}")
+
+# Load cell type predictions if available
+has_celltypes = False
+if os.path.exists(CELLASSIGN_PREDICTIONS):
+    print(f"\n📋 Loading CellAssign predictions: {CELLASSIGN_PREDICTIONS}")
+    predictions = pd.read_csv(CELLASSIGN_PREDICTIONS, index_col='cell_id')
+    adata.obs['celltype_pred'] = predictions['celltype_pred'].reindex(adata.obs_names)
+    has_celltypes = True
+    print(f"   Cell types: {adata.obs['celltype_pred'].nunique()}")
 
 # Setup MrVI - CRITICAL: use sample_key, not batch_key
 print("\n⚙️  Setting up MrVI model...")
@@ -111,18 +122,16 @@ adata.obsm["X_mrvi_z"] = z_mrvi
 sc.pp.neighbors(adata, use_rep="X_mrvi_u")
 sc.tl.umap(adata)
 
-fig, axes = plt.subplots(1, 2, figsize=(14, 6))
-sc.pl.umap(adata, color=SAMPLE_KEY, ax=axes[0], show=False, 
-           legend_loc='on data', legend_fontsize=6)
-axes[0].set_title("MrVI u-space: UMAP colored by sample\n(sample-unaware / integrated)")
-
-# Also show a cell type coloring if available
-if "cell_type" in adata.obs.columns:
-    sc.pl.umap(adata, color="cell_type", ax=axes[1], show=False)
+if has_celltypes:
+    fig, axes = plt.subplots(1, 2, figsize=(16, 7))
+    sc.pl.umap(adata, color=SAMPLE_KEY, ax=axes[0], show=False, legend_loc='on data', legend_fontsize=6)
+    axes[0].set_title("MrVI u-space: UMAP colored by sample")
+    sc.pl.umap(adata, color='celltype_pred', ax=axes[1], show=False, legend_loc='right margin')
     axes[1].set_title("MrVI u-space: UMAP colored by cell type")
 else:
-    sc.pl.umap(adata, color=SAMPLE_KEY, ax=axes[1], show=False)
-    axes[1].set_title("MrVI u-space: UMAP")
+    fig, ax = plt.subplots(figsize=(8, 8))
+    sc.pl.umap(adata, color=SAMPLE_KEY, ax=ax, show=False, legend_loc='on data', legend_fontsize=6)
+    ax.set_title("MrVI u-space: UMAP colored by sample")
 
 plt.tight_layout()
 plt.savefig(f"{OUTPUT_DIR}/embeddings/mrvi/umap_preview.png", dpi=150)

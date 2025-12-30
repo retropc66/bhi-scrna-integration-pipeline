@@ -41,14 +41,14 @@ pip install scib scib-metrics  # Optional, for integration benchmarking
 Alternatively, set up a virtual environment as described in [DRAC_SETUP.md](DRAC_SETUP.md)
 
 ### Running on DRAC/Nibi Cluster
+Job submission scripts are expected to be submitted from the `slurm/` directory. They will use the relative path to access the appropriate python scripts.
+
+Currently, file paths are hardcoded into the individual python scripts in `scripts/`. Modify these according to your specific design.
 
 ```bash
 # Make scripts executable
 chmod +x *.sh
 
-Job submission scripts are expected to be submitted from the `slurm/` directory. They will use the relative path to access the appropriate python scripts.
-
-Currently, file paths are hardcoded into the individual python scripts in `scripts/`. Modify these according to your specific design.
 
 # Submit entire pipeline with automatic dependencies
 ./submit_pipeline.sh

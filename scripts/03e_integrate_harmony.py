@@ -4,6 +4,7 @@
 # CONFIG
 # =========================
 PREPROCESSED_H5AD = "/home/dcook/projects/def-dcook/active/rare_ov/output/anndata/preprocessed.h5ad"
+CELLASSIGN_PREDICTIONS = "/home/dcook/projects/def-dcook/active/rare_ov/output/cellassign/predictions.csv"
 OUTPUT_DIR = "/home/dcook/projects/def-dcook/active/rare_ov/output"
 EMBEDDING_NPZ = f"{OUTPUT_DIR}/embeddings/harmony/embedding.npz"
 BATCH_KEY = "sample_id"
@@ -12,6 +13,7 @@ N_PCS = 50
 
 import scanpy as sc
 import numpy as np
+import pandas as pd
 import json
 import os
 from datetime import datetime
@@ -34,6 +36,15 @@ adata = sc.read_h5ad(PREPROCESSED_H5AD)
 print(f"   Cells: {adata.n_obs:,}")
 print(f"   Genes (HVGs): {adata.n_vars:,}")
 print(f"   Batches: {adata.obs[BATCH_KEY].nunique()}")
+
+# Load cell type predictions if available
+has_celltypes = False
+if os.path.exists(CELLASSIGN_PREDICTIONS):
+    print(f"\n📋 Loading CellAssign predictions: {CELLASSIGN_PREDICTIONS}")
+    predictions = pd.read_csv(CELLASSIGN_PREDICTIONS, index_col='cell_id')
+    adata.obs['celltype_pred'] = predictions['celltype_pred'].reindex(adata.obs_names)
+    has_celltypes = True
+    print(f"   Cell types: {adata.obs['celltype_pred'].nunique()}")
 
 # Scale for PCA
 print("\n📊 Scaling...")
@@ -84,9 +95,17 @@ adata.obsm["X_harmony"] = X_harmony
 sc.pp.neighbors(adata, use_rep="X_harmony")
 sc.tl.umap(adata)
 
-fig, ax = plt.subplots(figsize=(8, 8))
-sc.pl.umap(adata, color=BATCH_KEY, ax=ax, show=False, legend_loc='on data', legend_fontsize=6)
-ax.set_title("Harmony: UMAP colored by batch")
+if has_celltypes:
+    fig, axes = plt.subplots(1, 2, figsize=(16, 7))
+    sc.pl.umap(adata, color=BATCH_KEY, ax=axes[0], show=False, legend_loc='on data', legend_fontsize=6)
+    axes[0].set_title("Harmony: UMAP colored by batch")
+    sc.pl.umap(adata, color='celltype_pred', ax=axes[1], show=False, legend_loc='right margin')
+    axes[1].set_title("Harmony: UMAP colored by cell type")
+else:
+    fig, ax = plt.subplots(figsize=(8, 8))
+    sc.pl.umap(adata, color=BATCH_KEY, ax=ax, show=False, legend_loc='on data', legend_fontsize=6)
+    ax.set_title("Harmony: UMAP colored by batch")
+
 plt.tight_layout()
 plt.savefig(f"{OUTPUT_DIR}/embeddings/harmony/umap_preview.png", dpi=150)
 plt.close()
