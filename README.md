@@ -53,6 +53,9 @@ chmod +x *.sh
 # Submit entire pipeline with automatic dependencies
 ./submit_pipeline.sh
 
+# Example if you ran your own preprocessing and want to run up to the benchmark
+./submit_pipeline.sh --from 2 --to 4 --methods scvi,scanvi,mrvi,harmony
+
 # Or submit individual steps
 sbatch 01_preprocess.sh
 sbatch 02_cellassign.sh
