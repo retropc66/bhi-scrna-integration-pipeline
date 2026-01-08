@@ -189,7 +189,7 @@ cat("\n=== Exporting ===\n")
 
 # Join layers for export
 obj[["RNA"]] <- JoinLayers(obj[["RNA"]])
-obj[["RNA_raw"]] <- JoinLayers(obj[["RNA_raw"]])
+#obj[["RNA_raw"]] <- JoinLayers(obj[["RNA_raw"]])
 
 # Helper function for gzipped 10X export
 write_10x_gzipped <- function(counts, output_dir, prefix = "") {
