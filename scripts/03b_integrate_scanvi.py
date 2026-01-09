@@ -3,10 +3,10 @@
 # =========================
 # CONFIG
 # =========================
-PREPROCESSED_H5AD = "/home/dcook/projects/def-dcook/active/rare_ov/output/anndata/preprocessed.h5ad"
-CELLASSIGN_PREDICTIONS = "/home/dcook/projects/def-dcook/active/rare_ov/output/cellassign/predictions.csv"
-SCVI_MODEL_DIR = "/home/dcook/projects/def-dcook/active/rare_ov/output/models/scvi"
-OUTPUT_DIR = "/home/dcook/projects/def-dcook/active/rare_ov/output"
+PREPROCESSED_H5AD = "../output/anndata/preprocessed.h5ad"
+CELLASSIGN_PREDICTIONS = "../output/cellassign/predictions.csv"
+SCVI_MODEL_DIR = "../output/models/scvi"
+OUTPUT_DIR = "../output"
 MODEL_DIR = f"{OUTPUT_DIR}/models/scanvi"
 EMBEDDING_NPZ = f"{OUTPUT_DIR}/embeddings/scanvi/embedding.npz"
 LABEL_KEY = "celltype_pred"

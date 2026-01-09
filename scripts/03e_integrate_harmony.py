@@ -3,9 +3,9 @@
 # =========================
 # CONFIG
 # =========================
-PREPROCESSED_H5AD = "/home/dcook/projects/def-dcook/active/rare_ov/output/anndata/preprocessed.h5ad"
-CELLASSIGN_PREDICTIONS = "/home/dcook/projects/def-dcook/active/rare_ov/output/cellassign/predictions.csv"
-OUTPUT_DIR = "/home/dcook/projects/def-dcook/active/rare_ov/output"
+PREPROCESSED_H5AD = "../output/anndata/preprocessed.h5ad"
+CELLASSIGN_PREDICTIONS = "../output/cellassign/predictions.csv"
+OUTPUT_DIR = "../output"
 EMBEDDING_NPZ = f"{OUTPUT_DIR}/embeddings/harmony/embedding.npz"
 BATCH_KEY = "sample_id"
 N_PCS = 50

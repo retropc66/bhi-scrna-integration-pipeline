@@ -3,9 +3,9 @@
 # =========================
 # CONFIG
 # =========================
-PREPROCESSED_H5AD = "/home/dcook/projects/def-dcook/active/rare_ov/output/anndata/preprocessed.h5ad"
-CELLASSIGN_PREDICTIONS = "/home/dcook/projects/def-dcook/active/rare_ov/output/cellassign/predictions.csv"
-OUTPUT_DIR = "/home/dcook/projects/def-dcook/active/rare_ov/output"
+PREPROCESSED_H5AD = "../output/anndata/preprocessed.h5ad"
+CELLASSIGN_PREDICTIONS = "../output/cellassign/predictions.csv"
+OUTPUT_DIR = "../output"
 MODEL_DIR = f"{OUTPUT_DIR}/models/scvi"
 EMBEDDING_NPZ = f"{OUTPUT_DIR}/embeddings/scvi/embedding.npz"
 BATCH_KEY = "sample_id"

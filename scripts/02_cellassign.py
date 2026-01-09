@@ -3,9 +3,9 @@
 # =========================
 # CONFIG
 # =========================
-RAW_H5AD = "/home/dcook/projects/def-dcook/active/rare_ov/output/anndata/raw.h5ad"
-MARKER_FILE = "/home/dcook/projects/def-dcook/active/rare_ov/data/markers/cellassign_markers_v2.csv"
-OUTPUT_DIR = "/home/dcook/projects/def-dcook/active/rare_ov/output/cellassign"
+RAW_H5AD = "../output/anndata/raw.h5ad"
+MARKER_FILE = "../data/markers/cellassign_markers_v2.csv"
+OUTPUT_DIR = "../output/cellassign"
 PREDICTIONS_CSV = f"{OUTPUT_DIR}/predictions.csv"
 PROBABILITIES_CSV = f"{OUTPUT_DIR}/probabilities.csv"
 CONFIDENCE_THRESHOLD = 0.5  # For marking "confident" assignments

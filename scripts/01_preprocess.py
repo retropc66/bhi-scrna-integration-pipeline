@@ -3,8 +3,8 @@
 # =========================
 # CONFIG
 # =========================
-RAW_H5AD = "/home/dcook/projects/def-dcook/active/rare_ov/output/anndata/raw.h5ad"
-PREPROCESSED_H5AD = "/home/dcook/projects/def-dcook/active/rare_ov/output/anndata/preprocessed.h5ad"
+RAW_H5AD = "../output/anndata/raw.h5ad"
+PREPROCESSED_H5AD = "../output/anndata/preprocessed.h5ad"
 N_TOP_GENES = 3000
 BATCH_KEY = "sample_id"
 # =========================

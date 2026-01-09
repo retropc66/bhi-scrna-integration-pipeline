@@ -3,10 +3,10 @@
 # =========================
 # CONFIG
 # =========================
-RAW_H5AD = "/home/dcook/projects/def-dcook/active/rare_ov/output/anndata/raw.h5ad"
-CELLASSIGN_PREDICTIONS = "/home/dcook/projects/def-dcook/active/rare_ov/output/cellassign/predictions.csv"
-EMBEDDINGS_DIR = "/home/dcook/projects/def-dcook/active/rare_ov/output/embeddings"
-OUTPUT_DIR = "/home/dcook/projects/def-dcook/active/rare_ov/output/anndata"
+RAW_H5AD = "../output/anndata/raw.h5ad"
+CELLASSIGN_PREDICTIONS = "../output/cellassign/predictions.csv"
+EMBEDDINGS_DIR = "../output/embeddings"
+OUTPUT_DIR = "../output/anndata"
 # Analysis parameters
 UMAP_MIN_DIST = 0.3
 LEIDEN_RESOLUTION = 0.2

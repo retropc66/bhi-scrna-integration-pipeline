@@ -10,10 +10,10 @@ Uses the scib-metrics Benchmarker class following best practices from:
 # =========================
 # CONFIG
 # =========================
-PREPROCESSED_H5AD = "/home/dcook/projects/def-dcook/active/rare_ov/output/anndata/preprocessed.h5ad"
-CELLASSIGN_PREDICTIONS = "/home/dcook/projects/def-dcook/active/rare_ov/output/cellassign/predictions.csv"
-EMBEDDINGS_DIR = "/home/dcook/projects/def-dcook/active/rare_ov/output/embeddings"
-OUTPUT_DIR = "/home/dcook/projects/def-dcook/active/rare_ov/output/benchmark"
+PREPROCESSED_H5AD = "../output/anndata/preprocessed.h5ad"
+CELLASSIGN_PREDICTIONS = "../output/cellassign/predictions.csv"
+EMBEDDINGS_DIR = "../output/embeddings"
+OUTPUT_DIR = "../output/benchmark"
 BATCH_KEY = "sample_id"
 LABEL_KEY = "celltype_pred"
 
