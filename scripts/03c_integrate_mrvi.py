@@ -3,9 +3,11 @@
 # =========================
 # CONFIG
 # =========================
-PREPROCESSED_H5AD = "../output/anndata/preprocessed.h5ad"
-CELLASSIGN_PREDICTIONS = "../output/cellassign/predictions.csv"
-OUTPUT_DIR = "../output"
+BASEDIR = "/project/rrg-tperkins/OBCF/active/BHI_single_cell_processing/analysis/integration/brain"
+SCRIPTDIR = "/project/rrg-tperkins/OBCF/active/BHI_single_cell_processing/bhi-scrna-integration-pipeline"
+PREPROCESSED_H5AD = f"{BASEDIR}/output/anndata/preprocessed.h5ad"
+CELLASSIGN_PREDICTIONS = f"{BASEDIR}/output/cellassign/predictions.csv"
+OUTPUT_DIR = f"{BASEDIR}/output"
 MODEL_DIR = f"{OUTPUT_DIR}/models/mrvi"
 EMBEDDING_NPZ = f"{OUTPUT_DIR}/embeddings/mrvi/embedding.npz"
 SAMPLE_KEY = "sample_id"     # Target covariate (what you compare)
@@ -36,23 +38,23 @@ print("STEP 03C: MrVI INTEGRATION (PyTorch backend)")
 print("=" * 60)
 
 # Load preprocessed data
-print(f"\n📂 Loading preprocessed data: {PREPROCESSED_H5AD}")
+print(f"\n Loading preprocessed data: {PREPROCESSED_H5AD}")
 adata = sc.read_h5ad(PREPROCESSED_H5AD)
-print(f"   Cells: {adata.n_obs:,}")
-print(f"   Genes (HVGs): {adata.n_vars:,}")
-print(f"   Samples: {adata.obs[SAMPLE_KEY].nunique()}")
+print(f"  Cells: {adata.n_obs:,}")
+print(f"  Genes (HVGs): {adata.n_vars:,}")
+print(f"  Samples: {adata.obs[SAMPLE_KEY].nunique()}")
 
 # Load cell type predictions if available
 has_celltypes = False
 if os.path.exists(CELLASSIGN_PREDICTIONS):
-    print(f"\n📋 Loading CellAssign predictions: {CELLASSIGN_PREDICTIONS}")
+    print(f"\n Loading CellAssign predictions: {CELLASSIGN_PREDICTIONS}")
     predictions = pd.read_csv(CELLASSIGN_PREDICTIONS, index_col='cell_id')
     adata.obs['celltype_pred'] = predictions['celltype_pred'].reindex(adata.obs_names)
     has_celltypes = True
-    print(f"   Cell types: {adata.obs['celltype_pred'].nunique()}")
+    print(f"  Cell types: {adata.obs['celltype_pred'].nunique()}")
 
 # Setup MrVI - CRITICAL: use sample_key, not batch_key
-print("\n⚙️  Setting up MrVI model...")
+print("\n️  Setting up MrVI model...")
 MRVI.setup_anndata(
     adata,
     layer="counts",
@@ -65,11 +67,11 @@ mrvi = MRVI(
     n_latent=N_LATENT
 )
 
-print(f"   Latent dimensions: {N_LATENT}")
-print(f"   Samples (target covariate): {adata.obs[SAMPLE_KEY].nunique()}")
+print(f"  Latent dimensions: {N_LATENT}")
+print(f"  Samples (target covariate): {adata.obs[SAMPLE_KEY].nunique()}")
 
 # Train model
-print("\n🚀 Training MrVI (this may take a while)...")
+print("\n Training MrVI (this may take a while)...")
 mrvi.train(
     max_epochs=800,
     early_stopping=True,
@@ -78,16 +80,16 @@ mrvi.train(
 )
 
 # Get BOTH latent representations
-print("\n📊 Extracting latent representations...")
+print("\n Extracting latent representations...")
 u_mrvi = mrvi.get_latent_representation(give_z=False)  # Sample-unaware (integrated)
 z_mrvi = mrvi.get_latent_representation(give_z=True)   # Sample-aware
 
 # Save model
-print(f"\n💾 Saving model: {MODEL_DIR}")
+print(f"\n Saving model: {MODEL_DIR}")
 mrvi.save(MODEL_DIR, overwrite=True)
 
 # Save embeddings as NPZ (both u and z)
-print(f"💾 Saving embeddings: {EMBEDDING_NPZ}")
+print(f" Saving embeddings: {EMBEDDING_NPZ}")
 np.savez_compressed(
     EMBEDDING_NPZ,
     u=u_mrvi.astype(np.float32),           # Primary integration embedding
@@ -116,7 +118,7 @@ with open(f"{OUTPUT_DIR}/embeddings/mrvi/metadata.json", "w") as f:
     json.dump(metadata, f, indent=2)
 
 # Quick UMAP preview for QC (using u embedding)
-print("\n🗺️  Generating UMAP preview...")
+print("\n️  Generating UMAP preview...")
 adata.obsm["X_mrvi_u"] = u_mrvi
 adata.obsm["X_mrvi_z"] = z_mrvi
 sc.pp.neighbors(adata, use_rep="X_mrvi_u")
@@ -137,9 +139,9 @@ plt.tight_layout()
 plt.savefig(f"{OUTPUT_DIR}/embeddings/mrvi/umap_preview.png", dpi=150)
 plt.close()
 
-print("\n✅ MrVI integration complete!")
-print(f"   Model: {MODEL_DIR}")
-print(f"   Embedding: {EMBEDDING_NPZ}")
-print(f"   - u (sample-unaware): use for integration benchmarking")
-print(f"   - z (sample-aware): use for DE/DA analysis")
-print(f"   Preview: {OUTPUT_DIR}/embeddings/mrvi/umap_preview.png")
+print("\n MrVI integration complete!")
+print(f"  Model: {MODEL_DIR}")
+print(f"  Embedding: {EMBEDDING_NPZ}")
+print(f"  - u (sample-unaware): use for integration benchmarking")
+print(f"  - z (sample-aware): use for DE/DA analysis")
+print(f"  Preview: {OUTPUT_DIR}/embeddings/mrvi/umap_preview.png")

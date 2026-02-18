@@ -3,11 +3,13 @@
 # =========================
 # CONFIG
 # =========================
-RAW_H5AD = "../output/anndata/raw.h5ad"
-MARKER_FILE = "../data/markers/cellassign_markers_v2.csv"
-OUTPUT_DIR = "../output/cellassign"
+BASEDIR = "/project/rrg-tperkins/OBCF/active/BHI_single_cell_processing/analysis/integration/brain"
+SCRIPTDIR = "/project/rrg-tperkins/OBCF/active/BHI_single_cell_processing/bhi-scrna-integration-pipeline"
+MARKER_FILE = f"{SCRIPTDIR}/data/markers/cellassign_markers_neurons.csv"
+OUTPUT_DIR = f"{BASEDIR}/output/cellassign"
 PREDICTIONS_CSV = f"{OUTPUT_DIR}/predictions.csv"
 PROBABILITIES_CSV = f"{OUTPUT_DIR}/probabilities.csv"
+RAW_H5AD = f"{BASEDIR}/output/anndata/raw.h5ad"
 CONFIDENCE_THRESHOLD = 0.5  # For marking "confident" assignments
 # =========================
 
@@ -30,44 +32,44 @@ print("STEP 02: CELLASSIGN ANNOTATION")
 print("=" * 60)
 
 # Load raw data
-print(f"\n📂 Loading raw data: {RAW_H5AD}")
+print(f"\n Loading raw data: {RAW_H5AD}")
 adata = sc.read_h5ad(RAW_H5AD)
-print(f"   Cells: {adata.n_obs:,}")
-print(f"   Genes: {adata.n_vars:,}")
+print(f"  Cells: {adata.n_obs:,}")
+print(f"  Genes: {adata.n_vars:,}")
 
 # Ensure sparse format
 if not sp.issparse(adata.X):
-    print("   Converting to sparse CSR format...")
+    print("  Converting to sparse CSR format...")
     adata.X = sp.csr_matrix(adata.X)
 
 # Load marker gene definitions
-print(f"\n📋 Loading marker genes: {MARKER_FILE}")
+print(f"\n Loading marker genes: {MARKER_FILE}")
 marker_gene_mat = pd.read_csv(MARKER_FILE, index_col=0)
-print(f"   Marker genes: {len(marker_gene_mat)}")
-print(f"   Cell types: {', '.join(marker_gene_mat.columns)}")
+print(f"  Marker genes: {len(marker_gene_mat)}")
+print(f"  Cell types: {', '.join(marker_gene_mat.columns)}")
 
 # Find intersection with dataset genes
 marker_genes = marker_gene_mat.index.intersection(adata.var_names)
 if len(marker_genes) == 0:
     raise ValueError("No marker genes found in dataset!")
 
-print(f"   Markers found in dataset: {len(marker_genes)}/{len(marker_gene_mat)}")
+print(f"  Markers found in dataset: {len(marker_genes)}/{len(marker_gene_mat)}")
 
 missing = marker_gene_mat.index.difference(adata.var_names).tolist()
 if missing:
-    print(f"   Missing markers: {missing}")
+    print(f"  Missing markers: {missing}")
 
 # Subset to marker genes
 marker_idx = np.where(adata.var_names.isin(marker_genes))[0]
 marker_counts = adata.X[:, marker_idx]
 
-print(f"\n🔬 Computing size factors...")
+print(f"\n Computing size factors...")
 lib_size = np.ravel(adata.X.sum(axis=1))
 size_factors = lib_size / lib_size.mean()
-print(f"   Size factor mean: {size_factors.mean():.4f} (should be ~1.0)")
+print(f"  Size factor mean: {size_factors.mean():.4f} (should be ~1.0)")
 
 # Create lean AnnData for CellAssign
-print("\n🧬 Building marker-only AnnData...")
+print("\n Building marker-only AnnData...")
 bdata = ad.AnnData(
     X=marker_counts,
     obs=adata.obs.copy(),
@@ -78,20 +80,20 @@ bdata.obs["size_factor"] = size_factors
 # Subset marker matrix to bdata genes - pass directly without binarization
 signatures = marker_gene_mat.loc[bdata.var_names].copy()
 
-print(f"   Signature matrix shape: {signatures.shape}")
-print(f"   Markers per cell type:")
+print(f"  Signature matrix shape: {signatures.shape}")
+print(f"  Markers per cell type:")
 for ct in signatures.columns:
     n_markers = (signatures[ct] == 1).sum()
-    print(f"      {ct}: {n_markers}")
+    print(f"     {ct}: {n_markers}")
 
 # Setup and train CellAssign
-print("\n🚀 Training CellAssign...")
+print("\n Training CellAssign...")
 CellAssign.setup_anndata(bdata, size_factor_key="size_factor")
 ca = CellAssign(bdata, signatures)
 ca.train(early_stopping_patience=50)  #400 epochs, early stopping. More patience to avoid stopping at bad local minimum)
 
 # Save convergence plot
-print("\n📈 Saving convergence plot...")
+print("\n Saving convergence plot...")
 history = ca.history
 fig, ax = plt.subplots(figsize=(8, 5))
 for key in ['elbo_validation', 'train_loss']:
@@ -106,7 +108,7 @@ plt.tight_layout()
 plt.savefig(f"{OUTPUT_DIR}/qc_plots/training_convergence.png", dpi=150)
 plt.close()
 
-print("\n📊 Predicting cell types...")
+print("\n Predicting cell types...")
 pred_probs = ca.predict()
 pred_probs.index = bdata.obs_names  # Ensure index matches cells
 
@@ -124,19 +126,19 @@ predictions_df = pd.DataFrame({
 })
 
 # Save outputs
-print(f"\n💾 Saving predictions: {PREDICTIONS_CSV}")
+print(f"\n Saving predictions: {PREDICTIONS_CSV}")
 predictions_df.to_csv(PREDICTIONS_CSV, index=False)
 
-print(f"💾 Saving probabilities: {PROBABILITIES_CSV}")
+print(f" Saving probabilities: {PROBABILITIES_CSV}")
 pred_probs.to_csv(PROBABILITIES_CSV)
 
 # Summary statistics
-print("\n📈 Cell Type Distribution:")
+print("\n Cell Type Distribution:")
 print(predictions_df['celltype_pred'].value_counts())
 print(f"\nConfident assignments: {confident.sum():,} / {len(confident):,} ({100*confident.sum()/len(confident):.1f}%)")
 
 # Generate QC plots
-print("\n📊 Generating QC plots...")
+print("\n Generating QC plots...")
 
 # 1. Cell type distribution
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -180,7 +182,7 @@ if 'sample_id' in adata.obs.columns:
     plt.savefig(f"{OUTPUT_DIR}/qc_plots/per_sample_composition.png", dpi=150, bbox_inches='tight')
     plt.close()
 
-print("\n✅ CellAssign complete!")
-print(f"   Predictions: {PREDICTIONS_CSV}")
-print(f"   Probabilities: {PROBABILITIES_CSV}")
-print(f"   QC plots: {OUTPUT_DIR}/qc_plots/")
+print("\n CellAssign complete!")
+print(f"  Predictions: {PREDICTIONS_CSV}")
+print(f"  Probabilities: {PROBABILITIES_CSV}")
+print(f"  QC plots: {OUTPUT_DIR}/qc_plots/")

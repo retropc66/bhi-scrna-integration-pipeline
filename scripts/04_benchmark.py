@@ -10,10 +10,12 @@ Uses the scib-metrics Benchmarker class following best practices from:
 # =========================
 # CONFIG
 # =========================
-PREPROCESSED_H5AD = "../output/anndata/preprocessed.h5ad"
-CELLASSIGN_PREDICTIONS = "../output/cellassign/predictions.csv"
-EMBEDDINGS_DIR = "../output/embeddings"
-OUTPUT_DIR = "../output/benchmark"
+BASEDIR = "/project/rrg-tperkins/OBCF/active/BHI_single_cell_processing/analysis/integration/brain"
+SCRIPTDIR = "/project/rrg-tperkins/OBCF/active/BHI_single_cell_processing/bhi-scrna-integration-pipeline"
+PREPROCESSED_H5AD = f"{BASEDIR}/output/anndata/preprocessed.h5ad"
+CELLASSIGN_PREDICTIONS = f"{BASEDIR}/output/cellassign/predictions.csv"
+EMBEDDINGS_DIR = f"{BASEDIR}/embeddings"
+OUTPUT_DIR = f"{BASEDIR}/benchmark"
 BATCH_KEY = "sample_id"
 LABEL_KEY = "celltype_pred"
 
@@ -57,31 +59,31 @@ if len(METHODS) == 0:
 # -----------------------------
 # Load data
 # -----------------------------
-print(f"\n📂 Loading preprocessed data: {PREPROCESSED_H5AD}")
+print(f"\n Loading preprocessed data: {PREPROCESSED_H5AD}")
 adata = sc.read_h5ad(PREPROCESSED_H5AD)
-print(f"   Cells: {adata.n_obs:,}")
-print(f"   Genes: {adata.n_vars:,}")
-print(f"   Batches: {adata.obs[BATCH_KEY].nunique()}")
+print(f"  Cells: {adata.n_obs:,}")
+print(f"  Genes: {adata.n_vars:,}")
+print(f"  Batches: {adata.obs[BATCH_KEY].nunique()}")
 
 # Load cell type labels
-print(f"\n📋 Loading CellAssign predictions: {CELLASSIGN_PREDICTIONS}")
+print(f"\n Loading CellAssign predictions: {CELLASSIGN_PREDICTIONS}")
 predictions = pd.read_csv(CELLASSIGN_PREDICTIONS, index_col='cell_id')
 adata.obs[LABEL_KEY] = predictions['celltype_pred'].reindex(adata.obs_names)
-print(f"   Cell types: {adata.obs[LABEL_KEY].nunique()}")
+print(f"  Cell types: {adata.obs[LABEL_KEY].nunique()}")
 
 # -----------------------------
 # Compute unintegrated PCA baseline
 # -----------------------------
 # preprocessed.h5ad is already log-normalized
-print("\n🔧 Computing unintegrated PCA baseline...")
+print("\n Computing unintegrated PCA baseline...")
 sc.tl.pca(adata, n_comps=30)
 adata.obsm["X_pca_unintegrated"] = adata.obsm["X_pca"].copy()
-print(f"   Shape: {adata.obsm['X_pca_unintegrated'].shape}")
+print(f"  Shape: {adata.obsm['X_pca_unintegrated'].shape}")
 
 # -----------------------------
 # Load pre-computed embeddings
 # -----------------------------
-print("\n📊 Loading embeddings...")
+print("\n Loading embeddings...")
 
 embedding_keys = ["X_pca_unintegrated"]
 
@@ -104,7 +106,7 @@ for method in METHODS:
     embedding_keys.append(key)
     print(f"      Shape: {embedding.shape}")
 
-print(f"\n✅ Methods to benchmark: {[k.replace('X_', '') for k in embedding_keys]}")
+print(f"\n Methods to benchmark: {[k.replace('X_', '') for k in embedding_keys]}")
 
 # -----------------------------
 # Run scib-metrics Benchmarker
@@ -130,10 +132,10 @@ bm = Benchmarker(
     n_jobs=N_JOBS
 )
 
-print("\n⚙️  Preparing (computing neighbors)...")
+print("\n️  Preparing (computing neighbors)...")
 bm.prepare()
 
-print("\n🚀 Computing metrics...")
+print("\n Computing metrics...")
 bm.benchmark()
 
 # -----------------------------
@@ -168,7 +170,7 @@ with open(f"{OUTPUT_DIR}/metadata.json", "w") as f:
 # -----------------------------
 # Plots
 # -----------------------------
-print("\n📊 Generating plots...")
+print("\n Generating plots...")
 
 bm.plot_results_table(min_max_scale=True, show=False, save_dir=OUTPUT_DIR)
 
@@ -188,6 +190,6 @@ if agg_cols:
     plt.savefig(f"{OUTPUT_DIR}/benchmark_summary.png", dpi=150, bbox_inches='tight')
 plt.close()
 
-print("\n✅ Benchmarking complete!")
-print(f"   Results: {OUTPUT_DIR}/metrics_scaled.csv")
-print(f"   Plot: {OUTPUT_DIR}/benchmark_summary.png")
+print("\n Benchmarking complete!")
+print(f"  Results: {OUTPUT_DIR}/metrics_scaled.csv")
+print(f"  Plot: {OUTPUT_DIR}/benchmark_summary.png")

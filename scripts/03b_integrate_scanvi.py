@@ -3,10 +3,12 @@
 # =========================
 # CONFIG
 # =========================
-PREPROCESSED_H5AD = "../output/anndata/preprocessed.h5ad"
-CELLASSIGN_PREDICTIONS = "../output/cellassign/predictions.csv"
-SCVI_MODEL_DIR = "../output/models/scvi"
-OUTPUT_DIR = "../output"
+BASEDIR = "/project/rrg-tperkins/OBCF/active/BHI_single_cell_processing/analysis/integration/brain"
+SCRIPTDIR = "/project/rrg-tperkins/OBCF/active/BHI_single_cell_processing/bhi-scrna-integration-pipeline"
+PREPROCESSED_H5AD = f"{BASEDIR}/output/anndata/preprocessed.h5ad"
+CELLASSIGN_PREDICTIONS = f"{BASEDIR}/output/cellassign/predictions.csv"
+SCVI_MODEL_DIR = f"{BASEDIR}./output/models/scvi"
+OUTPUT_DIR = f"{BASEDIR}/output"
 MODEL_DIR = f"{OUTPUT_DIR}/models/scanvi"
 EMBEDDING_NPZ = f"{OUTPUT_DIR}/embeddings/scanvi/embedding.npz"
 LABEL_KEY = "celltype_pred"
@@ -35,13 +37,13 @@ print("STEP 03B: scANVI INTEGRATION")
 print("=" * 60)
 
 # Load preprocessed data
-print(f"\n📂 Loading preprocessed data: {PREPROCESSED_H5AD}")
+print(f"\n Loading preprocessed data: {PREPROCESSED_H5AD}")
 adata = sc.read_h5ad(PREPROCESSED_H5AD)
-print(f"   Cells: {adata.n_obs:,}")
-print(f"   Genes (HVGs): {adata.n_vars:,}")
+print(f"  Cells: {adata.n_obs:,}")
+print(f"  Genes (HVGs): {adata.n_vars:,}")
 
 # Load CellAssign predictions
-print(f"\n📋 Loading CellAssign predictions: {CELLASSIGN_PREDICTIONS}")
+print(f"\n Loading CellAssign predictions: {CELLASSIGN_PREDICTIONS}")
 predictions = pd.read_csv(CELLASSIGN_PREDICTIONS)
 predictions = predictions.set_index('cell_id')
 
@@ -63,26 +65,26 @@ else:
 
 adata.obs[LABEL_KEY] = labels
 
-print(f"\n📊 Label distribution:")
+print(f"\n Label distribution:")
 print(adata.obs[LABEL_KEY].value_counts())
 
 # Load scVI model
-print(f"\n🔄 Loading scVI model: {SCVI_MODEL_DIR}")
+print(f"\n Loading scVI model: {SCVI_MODEL_DIR}")
 vae = scvi.model.SCVI.load(SCVI_MODEL_DIR, adata=adata)
 
 # Convert to scANVI
-print("\n⚙️  Building scANVI from scVI model...")
+print("\n️  Building scANVI from scVI model...")
 scanvi = scvi.model.SCANVI.from_scvi_model(
     vae,
     labels_key=LABEL_KEY,
     unlabeled_category=UNLABELED_CATEGORY
 )
 
-print(f"   Using labels from: {LABEL_KEY}")
-print(f"   Unlabeled category: {UNLABELED_CATEGORY}")
+print(f"  Using labels from: {LABEL_KEY}")
+print(f"  Unlabeled category: {UNLABELED_CATEGORY}")
 
 # Train scANVI
-print("\n🚀 Training scANVI (fine-tuning with labels)...")
+print("\n Training scANVI (fine-tuning with labels)...")
 scanvi.train(
     max_epochs=800,
     early_stopping=True,
@@ -92,15 +94,15 @@ scanvi.train(
 )
 
 # Get latent representation
-print("\n📊 Extracting latent representation...")
+print("\n Extracting latent representation...")
 X_scanvi = scanvi.get_latent_representation()
 
 # Save model
-print(f"\n💾 Saving model: {MODEL_DIR}")
+print(f"\n Saving model: {MODEL_DIR}")
 scanvi.save(MODEL_DIR, overwrite=True)
 
 # Save embedding as NPZ
-print(f"💾 Saving embedding: {EMBEDDING_NPZ}")
+print(f" Saving embedding: {EMBEDDING_NPZ}")
 np.savez_compressed(
     EMBEDDING_NPZ,
     embedding=X_scanvi.astype(np.float32),
@@ -124,7 +126,7 @@ with open(f"{OUTPUT_DIR}/embeddings/scanvi/metadata.json", "w") as f:
     json.dump(metadata, f, indent=2)
 
 # Quick UMAP preview for QC
-print("\n🗺️  Generating UMAP preview...")
+print("\n️  Generating UMAP preview...")
 adata.obsm["X_scanvi"] = X_scanvi
 sc.pp.neighbors(adata, use_rep="X_scanvi")
 sc.tl.umap(adata)
@@ -138,7 +140,7 @@ plt.tight_layout()
 plt.savefig(f"{OUTPUT_DIR}/embeddings/scanvi/umap_preview.png", dpi=150)
 plt.close()
 
-print("\n✅ scANVI integration complete!")
-print(f"   Model: {MODEL_DIR}")
-print(f"   Embedding: {EMBEDDING_NPZ}")
-print(f"   Preview: {OUTPUT_DIR}/embeddings/scanvi/umap_preview.png")
+print("\n scANVI integration complete!")
+print(f"  Model: {MODEL_DIR}")
+print(f"  Embedding: {EMBEDDING_NPZ}")
+print(f"  Preview: {OUTPUT_DIR}/embeddings/scanvi/umap_preview.png")
