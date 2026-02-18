@@ -56,7 +56,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Create logs directory
-mkdir -p logs
+# mkdir -p logs
 
 echo "=================================================="
 echo "scRNA-seq Integration Pipeline Submission"

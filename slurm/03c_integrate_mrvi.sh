@@ -1,14 +1,12 @@
 #!/bin/bash
 #SBATCH --job-name=03c_mrvi
-#SBATCH --account=def-dcook
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
 #SBATCH --time=12:00:00
 #SBATCH --gres=gpu:h100:1
-#SBATCH --output=logs/%x_%j.out
-#SBATCH --error=logs/%x_%j.err
+#SBATCH -o /project/rrg-tperkins/OBCF/active/BHI_single_cell_processing/logs/slurm/03c_integrate_mrvi.sh.%A_%a.out
 
 # Step 03c: MrVI integration (GPU)
 # Uses PyTorch backend (TorchMRVI) - same environment as scVI/scANVI
@@ -16,7 +14,7 @@
 
 module load StdEnv/2023 python/3.11 cuda/12.9
 
-source ~/envs/scrna_integration/bin/activate
+source /project/rrg-tperkins/OBCF/active/BHI_single_cell_processing/envs/scrna_integration/bin/activate
 
 echo "=========================================="
 echo "Job: $SLURM_JOB_NAME"
@@ -29,7 +27,7 @@ echo "GPU Status:"
 nvidia-smi --query-gpu=name,memory.total,memory.free --format=csv
 echo ""
 
-python ../scripts/03c_integrate_mrvi.py
+python /project/rrg-tperkins/OBCF/active/BHI_single_cell_processing/bhi-scrna-integration-pipeline/scripts/03c_integrate_mrvi.py
 
 echo ""
 echo "Completed: $(date)"
