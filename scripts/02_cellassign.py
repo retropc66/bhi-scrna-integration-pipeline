@@ -3,10 +3,15 @@
 # =========================
 # CONFIG
 # =========================
-BASEDIR = "/project/rrg-tperkins/OBCF/active/BHI_single_cell_processing/analysis/integration/brain"
+BASEDIR = "/project/rrg-tperkins/OBCF/active/BHI_single_cell_processing/analysis/integration/heart"
 SCRIPTDIR = "/project/rrg-tperkins/OBCF/active/BHI_single_cell_processing/bhi-scrna-integration-pipeline"
-MARKER_FILE = f"{SCRIPTDIR}/data/markers/cellassign_markers_neurons.csv"
-OUTPUT_DIR = f"{BASEDIR}/output/cellassign"
+# MARKER_FILE = f"{SCRIPTDIR}/data/markers/cellassign_markers_neurons.csv"
+# MARKER_FILE = f"{SCRIPTDIR}/data/markers/cellassign_markers_cardiac_chatGPT.csv"
+# OUTPUT_DIR = f"{BASEDIR}/output/cellassign"
+# MARKER_FILE = f"{SCRIPTDIR}/data/markers/mouse_heart_scRNAseq_markers_claude.csv"
+# OUTPUT_DIR = f"{BASEDIR}/output/cellassign_claude"
+MARKER_FILE = f"{SCRIPTDIR}/data/markers/cellassign_markers_heart_asma.csv"
+OUTPUT_DIR = f"{BASEDIR}/output/cellassign_asma"
 PREDICTIONS_CSV = f"{OUTPUT_DIR}/predictions.csv"
 PROBABILITIES_CSV = f"{OUTPUT_DIR}/probabilities.csv"
 RAW_H5AD = f"{BASEDIR}/output/anndata/raw.h5ad"
