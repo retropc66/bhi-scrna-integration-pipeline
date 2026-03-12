@@ -3,7 +3,7 @@
 # =========================
 # CONFIG
 # =========================
-BASEDIR = "/project/rrg-tperkins/OBCF/active/BHI_single_cell_processing/analysis/integration/brain"
+BASEDIR = "/project/rrg-tperkins/OBCF/active/BHI_single_cell_processing/analysis/integration/heart"
 SCRIPTDIR = "/project/rrg-tperkins/OBCF/active/BHI_single_cell_processing/bhi-scrna-integration-pipeline"
 PREPROCESSED_H5AD = f"{BASEDIR}/output/anndata/preprocessed.h5ad"
 CELLASSIGN_PREDICTIONS = f"{BASEDIR}/output/cellassign/predictions.csv"
@@ -84,6 +84,15 @@ if not np.array_equal(obs_names_embed, adata.obs_names.to_numpy()):
     X_embed = embed_df.reindex(adata.obs_names).values
 
 adata.obsm[f'X_{METHOD}'] = X_embed
+
+# Export embedding to .csv (allows easy import to Seurat)
+embed_df = pd.DataFrame(
+    X_embed,
+    index=obs_names_embed,
+    columns=[f"{METHOD}_{i+1}" for i in range(X_embed.shape[1])]
+)
+
+df.to_csv(f"{EMBEDDINGS_DIR}/{METHOD}/embedding.csv")
 
 # Normalize X for visualization (preserve counts in layer)
 print("\n Normalizing for visualization...")
