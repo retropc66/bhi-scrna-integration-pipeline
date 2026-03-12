@@ -149,10 +149,10 @@ if [[ $FROM_STEP -le 3 && $TO_STEP -ge 3 ]]; then
     JOB_03C=$(submit_job "03c_integrate_mrvi.sh" "$STEP3_DEPS" "" | tail -1)
     echo "    Job ID: $JOB_03C"
     
-    # 03d: SysVI (parallel with scVI)
-    echo "  03d: SysVI..."
-    JOB_03D=$(submit_job "03d_integrate_sysvi.sh" "$STEP3_DEPS" "" | tail -1)
-    echo "    Job ID: $JOB_03D"
+    # 03d: SysVI (parallel with scVI) - not yet working
+    # echo "  03d: SysVI..."
+    # JOB_03D=$(submit_job "03d_integrate_sysvi.sh" "$STEP3_DEPS" "" | tail -1)
+    # echo "    Job ID: $JOB_03D"
     
     # 03b: scANVI (must wait for scVI to complete)
     SCANVI_DEPS="$JOB_03A"
@@ -163,6 +163,11 @@ if [[ $FROM_STEP -le 3 && $TO_STEP -ge 3 ]]; then
     JOB_03B=$(submit_job "03b_integrate_scanvi.sh" "$SCANVI_DEPS" "" | tail -1)
     echo "    Job ID: $JOB_03B"
     
+    # 03e: Harmony (parallel with scVI)
+    echo "  03e: Harmony..."
+    JOB_03E=$(submit_job "03e_integrate_harmony.sh" "$STEP3_DEPS" "" | tail -1)
+    echo "    Job ID: $JOB_03E"
+
     echo ""
 fi
 
@@ -204,6 +209,7 @@ if [[ $FROM_STEP -le 5 && $TO_STEP -ge 5 ]]; then
             scanvi) STEP5_DEPS="$JOB_03B" ;;
             mrvi)   STEP5_DEPS="$JOB_03C" ;;
             sysvi)  STEP5_DEPS="$JOB_03D" ;;
+            harmony)  STEP5_DEPS="$JOB_03E" ;;
         esac
     fi
     
@@ -228,6 +234,7 @@ echo "Job Summary:"
 [[ -n "$JOB_03B" ]] && echo "  03b_scanvi:    $JOB_03B (waits for 03a)"
 [[ -n "$JOB_03C" ]] && echo "  03c_mrvi:      $JOB_03C"
 [[ -n "$JOB_03D" ]] && echo "  03d_sysvi:     $JOB_03D"
+[[ -n "$JOB_03E" ]] && echo "  03e_harmony:     $JOB_03E"
 [[ -n "$JOB_04" ]] && echo "  04_benchmark:  $JOB_04"
 [[ -n "$JOB_05" ]] && echo "  05_finalize:   $JOB_05"
 echo ""
